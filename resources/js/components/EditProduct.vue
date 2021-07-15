@@ -264,22 +264,34 @@ export default {
 
 
 
-        console.log(this.product_variant)
+        // console.log(this.product_variant)
 
-        let tags = ['xs','sm'];
+        let tags = [];
         this.product_variant_prices = [];
-        for (let i=0 ;i>uniq.length ; i++){
-            this.product_variant_props.filter((item) => {
-                if (uniq[i] ==item.varient_id ){
-                    tags.push(item.tags);
-                }
 
+        this.product_variant.forEach(item=>{
+            this.product_variant_props.forEach(item2=>{
+                console.log(item2.variant_id , item.option)
+                if (item2.variant_id == item.option){
+                    console.log(item.tags)
+                    item.tags.push(item2.variant);
+                }
             })
-        }
+
+        })
+        // console.log(this.product_variant)
+        // console.log(tags)
+        //     this.product_variant_props.filter((item) => {
+        //         if (uniq[i] ==item.varient_id ){
+        //             tags.push(item.tags);
+        //         }
+        //
+        //     })
+        //
         // this.product_variant_props.filter((item) => {
         //     tags.push(item.variant);
         // })
-        console.log(this.product_variant)
+        // console.log(this.product_variant)
 
 
 

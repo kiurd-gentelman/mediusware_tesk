@@ -2351,27 +2351,33 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     this.product_variant.push({
       option: available_variants[0],
       tags: []
-    });
-    console.log(this.product_variant);
-    var tags = ['xs', 'sm'];
-    this.product_variant_prices = [];
+    }); // console.log(this.product_variant)
 
-    var _loop = function _loop(i) {
-      _this2.product_variant_props.filter(function (item) {
-        if (uniq[i] == item.varient_id) {
-          tags.push(item.tags);
+    var tags = [];
+    this.product_variant_prices = [];
+    this.product_variant.forEach(function (item) {
+      _this2.product_variant_props.forEach(function (item2) {
+        console.log(item2.variant_id, item.option);
+
+        if (item2.variant_id == item.option) {
+          console.log(item.tags);
+          item.tags.push(item2.variant);
         }
       });
-    };
-
-    for (var i = 0; i > uniq.length; i++) {
-      _loop(i);
-    } // this.product_variant_props.filter((item) => {
+    }); // console.log(this.product_variant)
+    // console.log(tags)
+    //     this.product_variant_props.filter((item) => {
+    //         if (uniq[i] ==item.varient_id ){
+    //             tags.push(item.tags);
+    //         }
+    //
+    //     })
+    //
+    // this.product_variant_props.filter((item) => {
     //     tags.push(item.variant);
     // })
-
-
-    console.log(this.product_variant); // console.log(locOption)
+    // console.log(this.product_variant)
+    // console.log(locOption)
     // console.log(locTag)
   }
 });
