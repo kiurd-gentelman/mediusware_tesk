@@ -49,7 +49,7 @@
                             </div>
                             <div class="col-md-8">
                                 <div class="form-group">
-                                    <label v-if="product_variant.length != 1" @click="product_variant.splice(index,1); checkVariant"
+                                    <label v-if="product_variant.length != 1" @click="product_variant.splice(index,1) ; checkVariant"
                                            class="float-right text-primary"
                                            style="cursor: pointer;">Remove</label>
                                     <label v-else for="">.</label>
@@ -112,9 +112,17 @@ export default {
             required: true
         },
         product:{
-            type: Array,
+            type: '',
             required: true
-        }
+        },
+        product_variant_price_props:{
+            type: '',
+            required: true
+        },
+        product_variant_props:{
+            type: '',
+            required: true
+        },
 
     },
     data() {
@@ -142,14 +150,17 @@ export default {
         // it will push a new object into product variant
         newVariant() {
             let all_variants = this.variants.map(el => el.id)
+            console.log(all_variants)
             let selected_variants = this.product_variant.map(el => el.option);
+            console.log(selected_variants)
             let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
-            // console.log(available_variants)
+            console.log(available_variants)
 
             this.product_variant.push({
                 option: available_variants[0],
                 tags: []
             })
+            console.log(this.product_variant)
         },
 
         // check the variant and render all the combination
@@ -159,6 +170,8 @@ export default {
             this.product_variant.filter((item) => {
                 tags.push(item.tags);
             })
+
+            console.log(this.product_variant)
 
             this.getCombn(tags).forEach(item => {
                 this.product_variant_prices.push({
@@ -209,7 +222,71 @@ export default {
     },
     mounted() {
         console.log('Component mounted.')
-        console.log(this.images)
+        // console.log(this.product_variant_props)
+        this.product_name = this.product.title;
+        this.product_sku = this.product.product_sku;
+        this.description = this.product.description;
+
+        let locOption = []
+        let locTag = []
+        let selectedVariant = [
+            {
+                selectedOption: '',
+                selectedTags: []
+            }
+        ]
+        // this.product_variant.push({
+        //     option: available_variants[0],
+        //     tags: []
+        // })
+
+        this.product_variant_props.forEach(item => {
+            locOption.push(item.variant_id)
+            locTag.push( item.variant)
+        })
+
+        let uniq = [...new Set(locOption)]
+
+        let all_variants = this.variants.map(el => el.id)
+        // console.log(all_variants)
+        let selected_variants = uniq;
+        // console.log(selected_variants)
+        let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
+        // console.log(available_variants)
+
+
+
+        this.product_variant.push({
+            option: available_variants[0],
+            tags: []
+        })
+
+
+
+
+        console.log(this.product_variant)
+
+        let tags = ['xs','sm'];
+        this.product_variant_prices = [];
+        for (let i=0 ;i>uniq.length ; i++){
+            this.product_variant_props.filter((item) => {
+                if (uniq[i] ==item.varient_id ){
+                    tags.push(item.tags);
+                }
+
+            })
+        }
+        // this.product_variant_props.filter((item) => {
+        //     tags.push(item.variant);
+        // })
+        console.log(this.product_variant)
+
+
+
+
+        // console.log(locOption)
+        // console.log(locTag)
+
 
 
     }

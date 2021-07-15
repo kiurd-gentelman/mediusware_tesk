@@ -153,8 +153,12 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
+        $product_variant_price = $product->variantPrice;
+        $product_variant = $product->productVariant;
+//        dump($product_variant_price);
+//        dd($product_variant);
         $variants = Variant::all();
-        return view('products.edit', compact('variants','product'));
+        return view('products.edit', compact('variants','product','product_variant','product_variant_price'));
     }
 
     /**
