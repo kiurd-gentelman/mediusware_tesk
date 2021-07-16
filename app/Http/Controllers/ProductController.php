@@ -156,7 +156,7 @@ class ProductController extends Controller
         $product_variant_price = $product->variantPrice;
         $product_variant = $product->productVariant;
 //        dump($product_variant_price);
-//        dd($product_variant);
+//        dd($product);
         $variants = Variant::all();
         return view('products.edit', compact('variants','product','product_variant','product_variant_price'));
     }
@@ -191,4 +191,11 @@ class ProductController extends Controller
             ->paginate(5);
         return view('products.index',compact('products'));
     }
+    public function variant_delete($id){
+
+        $varient = ProductVariantPrice::find($id);
+        $varient->delete();
+        return response()->json(200);
+    }
 }
+

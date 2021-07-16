@@ -2044,15 +2044,14 @@ __webpack_require__.r(__webpack_exports__);
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       };
-      console.log(product); // axios.post('/product', product).then(response => {
-      //     console.log(response.data);
-      //     window.location ='/product';
-      // }).catch(error => {
-      //     console.log(error);
-      //
-      // })
-      //
-      // console.log(product);
+      console.log(product);
+      axios.post('/product', product).then(function (response) {
+        console.log(response.data);
+        window.location = '/product';
+      })["catch"](function (error) {
+        console.log(error);
+      });
+      console.log(product);
     }
   },
   mounted: function mounted() {
@@ -2080,18 +2079,38 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue2_dropzone_dist_vue2Dropzone_min_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue2-dropzone/dist/vue2Dropzone.min.css */ "./node_modules/vue2-dropzone/dist/vue2Dropzone.min.css");
 /* harmony import */ var vue_input_tag__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue-input-tag */ "./node_modules/vue-input-tag/dist/vueInputTag.common.js");
 /* harmony import */ var vue_input_tag__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vue_input_tag__WEBPACK_IMPORTED_MODULE_2__);
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2234,7 +2253,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         headers: {
           "My-Awesome-Header": "header value"
         }
-      }
+      },
+      old_variant: this.product_variant_price_props
     };
   },
   methods: {
@@ -2309,13 +2329,33 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         console.log(error);
       });
       console.log(product);
+    },
+    variantName: function variantName(id) {
+      var v = this.product_variant_props.filter(function (item) {
+        return item.id == id;
+      }); // console.log()
+
+      return v[0]['variant'];
+    },
+    deleteVariant: function deleteVariant(index, id) {
+      var _this2 = this;
+
+      console.log(index);
+      console.log(id);
+      axios.get('/variant-delete/' + id).then(function (response) {
+        console.log(response.data);
+
+        _this2.old_variant.splice(index, 1);
+
+        console.log(_this2.product_variant_price_props);
+      })["catch"](function (error) {
+        console.log(error);
+      });
     }
   },
   mounted: function mounted() {
-    var _this2 = this;
-
-    console.log('Component mounted.'); // console.log(this.product_variant_props)
-
+    console.log('Component mounted.');
+    console.log(this.product_variant_props);
     this.product_name = this.product.title;
     this.product_sku = this.product.product_sku;
     this.description = this.product.description;
@@ -2328,43 +2368,66 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     //     option: available_variants[0],
     //     tags: []
     // })
-
-    this.product_variant_props.forEach(function (item) {
-      locOption.push(item.variant_id);
-      locTag.push(item.variant);
-    });
-
-    var uniq = _toConsumableArray(new Set(locOption));
-
-    var all_variants = this.variants.map(function (el) {
-      return el.id;
-    }); // console.log(all_variants)
-
-    var selected_variants = uniq; // console.log(selected_variants)
-
-    var available_variants = all_variants.filter(function (entry1) {
-      return !selected_variants.some(function (entry2) {
-        return entry1 == entry2;
-      });
-    }); // console.log(available_variants)
-
-    this.product_variant.push({
-      option: available_variants[0],
-      tags: []
-    }); // console.log(this.product_variant)
-
-    var tags = [];
-    this.product_variant_prices = [];
-    this.product_variant.forEach(function (item) {
-      _this2.product_variant_props.forEach(function (item2) {
-        console.log(item2.variant_id, item.option);
-
-        if (item2.variant_id == item.option) {
-          console.log(item.tags);
-          item.tags.push(item2.variant);
-        }
-      });
-    }); // console.log(this.product_variant)
+    // this.product_variant_props.forEach(item => {
+    //     locOption.push(item.variant_id)
+    //     locTag.push( item.variant)
+    // })
+    //
+    //
+    // let uniq = [...new Set(locOption)]
+    // // console.log('ami' ,uniq)
+    //
+    // for (let i=0; i<uniq.length ; i++){
+    //     let tempArray = []
+    //     this.product_variant_props.forEach(item =>{
+    //         if (uniq[i] == item.variant_id ){
+    //             tempArray.push(item.variant)
+    //         }
+    //     })
+    //
+    //     console.log(tempArray)
+    //     this.product_variant.push({
+    //         option: uniq[i],
+    //         tags: tempArray
+    //     })
+    // }
+    //
+    // console.log(this.product_variant)
+    // this.checkVariant()
+    // let all_variants = this.variants.map(el => el.id)
+    // // console.log(all_variants)
+    // let selected_variants = uniq;
+    // // console.log(selected_variants)
+    // let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
+    // // console.log(available_variants)
+    //
+    //
+    //
+    // this.product_variant.push({
+    //     option: available_variants[0],
+    //     tags: []
+    // })
+    //
+    //
+    //
+    //
+    // console.log(this.product_variant)
+    // console.log(this.product_variant_props)
+    //
+    // let tags = [];
+    // this.product_variant_prices = [];
+    //
+    // this.product_variant.forEach(item=>{
+    //     this.product_variant_props.forEach(item2=>{
+    //         console.log(item2.variant_id , item.option)
+    //         if (item2.variant_id == item.option){
+    //             console.log(item.tags)
+    //             item.tags.push(item2.variant);
+    //         }
+    //     })
+    //
+    // })
+    // console.log(this.product_variant)
     // console.log(tags)
     //     this.product_variant_props.filter((item) => {
     //         if (uniq[i] ==item.varient_id ){
@@ -51261,13 +51324,93 @@ var render = function() {
             : _vm._e(),
           _vm._v(" "),
           _c("div", { staticClass: "card-header text-uppercase" }, [
-            _vm._v("Preview")
+            _vm._v("Old Variant")
           ]),
           _vm._v(" "),
           _c("div", { staticClass: "card-body" }, [
             _c("div", { staticClass: "table-responsive" }, [
               _c("table", { staticClass: "table" }, [
                 _vm._m(2),
+                _vm._v(" "),
+                _c(
+                  "tbody",
+                  _vm._l(_vm.old_variant, function(variant_price, index) {
+                    return _c("tr", [
+                      _c("td", [
+                        _vm._v(
+                          _vm._s(
+                            variant_price.product_variant_one != null
+                              ? _vm.variantName(
+                                  variant_price.product_variant_one
+                                ) + "-"
+                              : ""
+                          ) +
+                            "\n                                    " +
+                            _vm._s(
+                              variant_price.product_variant_two != null
+                                ? _vm.variantName(
+                                    variant_price.product_variant_two
+                                  ) + "-"
+                                : ""
+                            ) +
+                            "\n                                    " +
+                            _vm._s(
+                              variant_price.product_variant_three != null
+                                ? _vm.variantName(
+                                    variant_price.product_variant_three
+                                  )
+                                : ""
+                            )
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _c("label", { attrs: { type: "text" } }, [
+                          _vm._v(_vm._s(variant_price.price))
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _c("label", { attrs: { type: "text" } }, [
+                          _vm._v(_vm._s(variant_price.stock))
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _c("label", { attrs: { type: "text" } }, [
+                          _c(
+                            "a",
+                            {
+                              staticClass: "btn btn-sm text-white btn-danger",
+                              on: {
+                                click: function($event) {
+                                  return _vm.deleteVariant(
+                                    index,
+                                    variant_price.id
+                                  )
+                                }
+                              }
+                            },
+                            [_vm._v("Delete")]
+                          )
+                        ])
+                      ])
+                    ])
+                  }),
+                  0
+                )
+              ])
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-header text-uppercase" }, [
+            _vm._v("Preview")
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body" }, [
+            _c("div", { staticClass: "table-responsive" }, [
+              _c("table", { staticClass: "table" }, [
+                _vm._m(3),
                 _vm._v(" "),
                 _c(
                   "tbody",
@@ -51392,6 +51535,22 @@ var staticRenderFns = [
         ])
       ]
     )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("td", [_vm._v("Variant")]),
+        _vm._v(" "),
+        _c("td", [_vm._v("Price")]),
+        _vm._v(" "),
+        _c("td", [_vm._v("Stock")]),
+        _vm._v(" "),
+        _c("td", [_vm._v("Action")])
+      ])
+    ])
   },
   function() {
     var _vm = this

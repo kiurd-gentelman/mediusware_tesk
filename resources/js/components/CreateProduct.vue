@@ -190,15 +190,15 @@ export default {
 
             console.log(product);
 
-            // axios.post('/product', product).then(response => {
-            //     console.log(response.data);
-            //     window.location ='/product';
-            // }).catch(error => {
-            //     console.log(error);
-            //
-            // })
-            //
-            // console.log(product);
+            axios.post('/product', product).then(response => {
+                console.log(response.data);
+                window.location ='/product';
+            }).catch(error => {
+                console.log(error);
+
+            })
+
+            console.log(product);
         }
 
 
