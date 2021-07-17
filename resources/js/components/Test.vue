@@ -62,38 +62,6 @@
                         <button @click="newVariant" class="btn btn-primary">Add another option</button>
                     </div>
 
-                    <div class="card-header text-uppercase">Old Variant</div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <td>Variant</td>
-                                    <td>Price</td>
-                                    <td>Stock</td>
-                                    <td>Action</td>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="(variant_price , index) in old_variant">
-                                    <td>{{ (variant_price.product_variant_one != null)? variantName(variant_price.product_variant_one) + '-' : ''}}
-                                        {{ (variant_price.product_variant_two != null)? variantName(variant_price.product_variant_two) + '-' : '' }}
-                                        {{ (variant_price.product_variant_three != null)? variantName(variant_price.product_variant_three) : ''}}</td>
-                                    <td>
-                                        <label type="text" >{{variant_price.price}}</label>
-                                    </td>
-                                    <td>
-                                        <label type="text"  >{{variant_price.stock}}</label>
-                                    </td>
-                                    <td>
-                                        <label type="text"  ><a class="btn btn-sm text-white btn-danger" @click="deleteVariant(index , variant_price.id )">Delete</a></label>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
                     <div class="card-header text-uppercase">Preview</div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -164,10 +132,7 @@
                 description: '',
                 images: [],
                 product_variant: [
-                    {
-                        option: this.variants[0].id,
-                        tags: []
-                    }
+
                 ],
                 product_variant_prices: [],
                 dropzoneOptions: {
@@ -175,9 +140,7 @@
                     thumbnailWidth: 150,
                     maxFilesize: 0.5,
                     headers: {"My-Awesome-Header": "header value"}
-                },
-                old_variant:this.product_variant_price_props
-
+                }
             }
         },
         methods: {
@@ -239,6 +202,8 @@
                     product_variant: this.product_variant,
                     product_variant_prices: this.product_variant_prices
                 }
+
+
                 axios.post('/product', product).then(response => {
                     console.log(response.data);
                     window.location ='/product';
@@ -248,32 +213,13 @@
                 })
 
                 console.log(product);
-            },
-
-            variantName(id){
-                let v = this.product_variant_props.filter(item => item.id ==id)
-                // console.log()
-                return v[0]['variant']
-            },
-            deleteVariant(index,id){
-                console.log(index)
-                console.log(id)
-
-                axios.get('/variant-delete/'+id).then(response => {
-                    console.log(response.data);
-                    this.old_variant.splice(index, 1)
-                    console.log(this.product_variant_price_props)
-                }).catch(error => {
-                    console.log(error);
-
-                })
             }
 
 
         },
         mounted() {
             console.log('Component mounted.')
-            console.log(this.product_variant_props)
+            // console.log(this.product_variant_props)
             this.product_name = this.product.title;
             this.product_sku = this.product.product_sku;
             this.description = this.product.description;
@@ -291,32 +237,32 @@
             //     tags: []
             // })
 
-            // this.product_variant_props.forEach(item => {
-            //     locOption.push(item.variant_id)
-            //     locTag.push( item.variant)
-            // })
-            //
-            //
-            // let uniq = [...new Set(locOption)]
-            // // console.log('ami' ,uniq)
-            //
-            // for (let i=0; i<uniq.length ; i++){
-            //     let tempArray = []
-            //     this.product_variant_props.forEach(item =>{
-            //         if (uniq[i] == item.variant_id ){
-            //             tempArray.push(item.variant)
-            //         }
-            //     })
-            //
-            //     console.log(tempArray)
-            //     this.product_variant.push({
-            //         option: uniq[i],
-            //         tags: tempArray
-            //     })
-            // }
-            //
-            // console.log(this.product_variant)
-            // this.checkVariant()
+            this.product_variant_props.forEach(item => {
+                locOption.push(item.variant_id)
+                locTag.push( item.variant)
+            })
+
+
+            let uniq = [...new Set(locOption)]
+            // console.log('ami' ,uniq)
+
+            for (let i=0; i<uniq.length ; i++){
+                let tempArray = []
+                this.product_variant_props.forEach(item =>{
+                    if (uniq[i] == item.variant_id ){
+                        tempArray.push(item.variant)
+                    }
+                })
+
+                console.log(tempArray)
+                this.product_variant.push({
+                    option: uniq[i],
+                    tags: tempArray
+                })
+            }
+
+            console.log(this.product_variant)
+            this.checkVariant()
             // let all_variants = this.variants.map(el => el.id)
             // // console.log(all_variants)
             // let selected_variants = uniq;
