@@ -24,7 +24,10 @@
                         <h6 class="m-0 font-weight-bold text-primary">Media</h6>
                     </div>
                     <div class="card-body border">
-                        <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <vue-dropzone ref="myVueDropzone" id="dropzone"
+                                      :options="dropzoneOptions"
+                                      @vdropzone-complete="afterComplete"
+                        ></vue-dropzone>
                     </div>
                 </div>
             </div>
@@ -126,10 +129,38 @@ export default {
             ],
             product_variant_prices: [],
             dropzoneOptions: {
-                url: 'https://httpbin.org/post',
+                url: '/upload-image',
                 thumbnailWidth: 150,
                 maxFilesize: 0.5,
-                headers: {"My-Awesome-Header": "header value"}
+                addRemoveLinks: true,
+                removeFile:true,
+                renameFile: function (file) {
+
+                    var dt = new Date();
+                    var time = dt.getTime();
+                    var path = time + file.name
+                    console.log(path)
+                    console.log(this.images)
+
+                    return path;
+                },
+                removedfile: function (file) {
+                    console.log(file.upload.filename);
+                    var name = file.upload.filename;
+                    console.log('ami eikhane' , name)
+                    var fileRef;
+
+                    axios.post('/delete-image', {'name':name}).then(response => {
+                        console.log(response.data);
+                    }).catch(error => {
+                        console.log(error);
+
+                    })
+                    return (fileRef = file.previewElement) != null ?
+                        fileRef.parentNode.removeChild(file.previewElement) : void 0;
+
+                },
+                headers: {'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,},
             }
         }
     },
@@ -199,7 +230,22 @@ export default {
             })
 
             console.log(product);
-        }
+        },
+        // afterComplete(file){
+        //     console.log(file);
+        // },
+        afterComplete: async function (response) {
+
+            if (response.status == "success") {
+                console.log(response.upload.filename)
+                console.log("upload successful");
+
+                this.sendSuccess = true;
+                this.images.push(response.upload.filename)
+            } else {
+                console.log("upload failed");
+            }
+        },
 
 
     },

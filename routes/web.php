@@ -28,4 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/search', 'ProductController@search')->name('search');
     Route::resource('blog', 'BlogController');
     Route::resource('blog-category', 'BlogCategoryController');
+
+    Route::post('/upload-image', 'ProductController@uploadImage');
+    Route::post('/delete-image', 'ProductController@deleteImage');
 });

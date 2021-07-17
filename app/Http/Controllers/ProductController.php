@@ -197,5 +197,20 @@ class ProductController extends Controller
         $varient->delete();
         return response()->json(200);
     }
+
+    public function uploadImage(Request $request){
+//        dd($request->all());
+        $imageName = $request->file->getClientOriginalName();
+//        dd($imageName);
+        $path= $request->file->move(public_path('images'), $imageName);
+        return response()->json($path);
+    }
+
+    public function deleteImage(Request $request){
+        if ($request->name){
+            unlink(public_path('/images'), $request->name);
+        }
+        dd($request->all());
+    }
 }
 
