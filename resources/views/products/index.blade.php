@@ -8,15 +8,19 @@
 
 
     <div class="card">
-        <form action="{{route('search')}}" method="post" class="card-header" >
-            @csrf
+{{--        <form action="{{route('search',['title'=>$request->title , 'variant'=>$request->varient, 'price_from'=>$request->price_from ,'price_to'=>$request->price_to , 'date'=>$request->date] )}}" method="get" class="card-header" >--}}
+        <form action="{{route('search' )}}" method="get" class="card-header" >
             <div class="form-row justify-content-between">
                 <div class="col-md-2">
-                    <input type="text" name="title" placeholder="Product Title" class="form-control">
+                    <input type="text" name="title" placeholder="Product Title" value="{{$request->title ?? ''}}" class="form-control">
                 </div>
                 <div class="col-md-2">
-                    <select name="variant" id="" class="form-control">
-
+                    <select name="variant" id="" class="form-control" name="variant">
+                        @forelse($variants as $variant)
+                        <option {{($request->variant ?? '' == $variant->id)?'selected':''}} value="{{$variant->id}}">{{$variant->title}}</option>
+                        @empty
+                            no data found
+                        @endforelse
                     </select>
                 </div>
 
@@ -25,12 +29,12 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">Price Range</span>
                         </div>
-                        <input type="text" name="price_from" aria-label="First name" placeholder="From" class="form-control">
-                        <input type="text" name="price_to" aria-label="Last name" placeholder="To" class="form-control">
+                        <input type="text" name="price_from" aria-label="First name" value="{{$request->price_from ?? ''}}" placeholder="From" class="form-control">
+                        <input type="text" name="price_to" aria-label="Last name" value="{{$request->price_to ?? ''}}" placeholder="To" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <input type="date" name="date" placeholder="Date" class="form-control">
+                    <input type="date" name="date" placeholder="Date" class="form-control" value="{{$request->date ?? ''}}">
                 </div>
                 <div class="col-md-1">
                     <button type="submit" class="btn btn-primary float-right"><i class="fa fa-search"></i></button>
@@ -123,17 +127,19 @@
 
         </div>
 {{--        @dump($products)--}}
-        <div class="card-footer">
-            <div class="row justify-content-between">
-                <div class="col-md-6">
-                    <p>Showing 1 to {{$products->currentPage() * $products->perPage()}} out of {{$products->total()}}</p>
-                </div>
-                <div class="col-md-2">
+        @if ($request == null)
+            <div class="card-footer">
+                <div class="row justify-content-between">
+                    <div class="col-md-6">
+                        <p>Showing 1 to {{$products->currentPage() * $products->perPage()}} out of {{$products->total()}}</p>
+                    </div>
+                    <div class="col-md-2">
 
-                    {{ $products->links() }}
+                        {{ $products->links() }}
+                    </div>
                 </div>
             </div>
-        </div>
+        @endif
     </div>
 
 @endsection

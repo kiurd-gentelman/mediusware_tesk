@@ -2044,10 +2044,11 @@ __webpack_require__.r(__webpack_exports__);
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       };
+      var formData = new FormData();
+      formData.append('product_image', this.images, 'title', this.product_name, 'sku', this.product_sku, 'description', this.description, 'product_image', this.images, 'product_variant', this.product_variant, 'product_variant_prices', this.product_variant_prices);
       console.log(product);
-      axios.post('/product', product).then(function (response) {
-        console.log(response.data);
-        window.location = '/product';
+      axios.post('/product', formData).then(function (response) {
+        console.log(response.data); // window.location ='/product';
       })["catch"](function (error) {
         console.log(error);
       });

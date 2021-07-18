@@ -9,6 +9,7 @@ use App\Models\Variant;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Input\Input;
 
 class ProductController extends Controller
 {
@@ -20,12 +21,14 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with('variantPrice')->paginate(5);
+        $variants = Variant::all();
 //        $products = Product:: select('products.id' ,'products.title','products.description','product_variants.variant' )
 //        ->leftJoin('product_variants','products.id' ,'=' ,'product_variants.product_id')
 //        ->paginate();
 //        dd($products);
 
-        return view('products.index',compact('products'));
+        $request= null;
+        return view('products.index',compact('products','variants','request'));
     }
 
     /**
@@ -65,6 +68,11 @@ class ProductController extends Controller
                 $insert_product->title = $request->title;
                 $insert_product->sku =$request->sku;
                 $insert_product->description =$request->description;
+                if ($request->hasFile('product_image')) {
+                    dd(2);
+                    $request->file('product_image')->store('public/product_image');
+                }
+                dd(3);
                 $insert_product->save();
 
                 if ($request->product_variant) {
@@ -185,11 +193,46 @@ class ProductController extends Controller
     }
 
     public function search(Request $request){
-        $search = $request->input('title');
-        $products = Product::with('variantPrice')
-            ->where('title' ,'LIKE',"%{$search}%")
-            ->paginate(5);
-        return view('products.index',compact('products'));
+//        dd($request->all());
+        $productId = array();
+        $searchTitle = $request->input('title');
+        $searchVariant = $request->input('variant');
+        $searchPriceFrom = $request->input('price_from');
+        $searchPriceTo = $request->input('price_to');
+        $orgDate = $request->input('date');
+        $newDate = date("Y-m-d", strtotime($orgDate));
+//        $v = ProductVariant::where('variant_id' , $searchVariant)->get()->pluck('id');
+//            dd($newDate);
+        $products = Product::where('title' ,'LIKE',"%{$searchTitle}%")
+            ->orWhereDate('created_at', '=', $newDate)
+            ->get()->pluck('id');
+//        dd($products);
+        foreach ($products as $product){
+//            dump($product);
+            array_push($productId , $product);
+        }
+
+        $products = ProductVariant::where('variant_id' ,$searchVariant)->get()->pluck('product_id');
+//        dd($products);
+        if ($products->count()) {
+            foreach ($products as $product){
+//            dump($product);
+                array_push($productId , $product);
+            }
+        }
+
+        $products = ProductVariantPrice::whereBetween('price' ,[$searchPriceFrom,$searchPriceTo])->get()->pluck('product_id');
+        if ($products->count()) {
+            foreach ($products as $product){
+//            dump($product);
+                array_push($productId , $product);
+            }
+        }
+
+        $products = Product::with('variantPrice')->whereIn('id',$productId)->get();
+        $variants = Variant::all();
+//        dd($products);
+        return view('products.index',compact('products','variants','request'));
     }
     public function variant_delete($id){
 

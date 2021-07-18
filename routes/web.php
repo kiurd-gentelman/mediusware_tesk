@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('product-variant', 'VariantController');
     Route::resource('product', 'ProductController');
     Route::get('/variant-delete/{id}', 'ProductController@variant_delete');
-    Route::post('/search', 'ProductController@search')->name('search');
+    Route::get('/search', 'ProductController@search')->name('search');
     Route::resource('blog', 'BlogController');
     Route::resource('blog-category', 'BlogCategoryController');
 });
