@@ -24,7 +24,11 @@
                         <h6 class="m-0 font-weight-bold text-primary">Media</h6>
                     </div>
                     <div class="card-body border">
-                        <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <vue-dropzone ref="myVueDropzone" id="dropzone"
+                                      :options="dropzoneOptions"
+                                      @vdropzone-complete="afterComplete"
+                                      @vdropzone-removed-file="removeFile"
+                        ></vue-dropzone>
                     </div>
                 </div>
             </div>
@@ -155,6 +159,10 @@
                 type: '',
                 required: true
             },
+            product_image:{
+                type: '',
+                required: true
+            },
 
         },
         data() {
@@ -171,10 +179,20 @@
                 ],
                 product_variant_prices: [],
                 dropzoneOptions: {
-                    url: 'https://httpbin.org/post',
+                    url: '/upload-image',
                     thumbnailWidth: 150,
                     maxFilesize: 0.5,
-                    headers: {"My-Awesome-Header": "header value"}
+                    addRemoveLinks: true,
+                    removeFile:true,
+                    uploadMultiple:true,
+                    renameFile: function (file) {
+                        var dt = new Date();
+                        var time = dt.getTime();
+                        var path = time + file.name
+                        return path;
+                    },
+                    removedfile: function (file)  {},
+                    headers: {'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,},
                 },
                 old_variant:this.product_variant_price_props
 
@@ -267,7 +285,42 @@
                     console.log(error);
 
                 })
-            }
+            },
+
+
+
+            removeFile(file){
+                var name = file.upload.filename;
+
+                var fileRef;
+
+                console.log(name)
+                var tempID = this.product_image.filter(item => item.file_path === name)[0].id
+
+                console.log(tempID)
+                axios.post('/delete-image', {'name':name , 'id':tempID}).then(response => {
+                    var temparray = this.images.filter(item => item != name)
+                    this.images = temparray
+
+                }).catch(error => {
+                    console.log(error);
+
+                })
+                return (fileRef = file.previewElement) != null ?
+                    fileRef.parentNode.removeChild(file.previewElement) : void 0;
+            },
+            afterComplete: async function (response) {
+
+                if (response.status == "success") {
+                    console.log(response.upload.filename)
+                    console.log("upload successful");
+
+                    this.sendSuccess = true;
+                    this.images.push(response.upload.filename)
+                } else {
+                    console.log("upload failed");
+                }
+            },
 
 
         },
@@ -286,91 +339,26 @@
                     selectedTags: []
                 }
             ]
-            // this.product_variant.push({
-            //     option: available_variants[0],
-            //     tags: []
-            // })
 
-            // this.product_variant_props.forEach(item => {
-            //     locOption.push(item.variant_id)
-            //     locTag.push( item.variant)
-            // })
-            //
-            //
-            // let uniq = [...new Set(locOption)]
-            // // console.log('ami' ,uniq)
-            //
-            // for (let i=0; i<uniq.length ; i++){
-            //     let tempArray = []
-            //     this.product_variant_props.forEach(item =>{
-            //         if (uniq[i] == item.variant_id ){
-            //             tempArray.push(item.variant)
-            //         }
-            //     })
-            //
-            //     console.log(tempArray)
-            //     this.product_variant.push({
-            //         option: uniq[i],
-            //         tags: tempArray
-            //     })
-            // }
-            //
-            // console.log(this.product_variant)
-            // this.checkVariant()
-            // let all_variants = this.variants.map(el => el.id)
-            // // console.log(all_variants)
-            // let selected_variants = uniq;
-            // // console.log(selected_variants)
-            // let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
-            // // console.log(available_variants)
-            //
-            //
-            //
-            // this.product_variant.push({
-            //     option: available_variants[0],
-            //     tags: []
-            // })
-            //
-            //
-            //
-            //
-            // console.log(this.product_variant)
-            // console.log(this.product_variant_props)
-            //
-            // let tags = [];
-            // this.product_variant_prices = [];
-            //
-            // this.product_variant.forEach(item=>{
-            //     this.product_variant_props.forEach(item2=>{
-            //         console.log(item2.variant_id , item.option)
-            //         if (item2.variant_id == item.option){
-            //             console.log(item.tags)
-            //             item.tags.push(item2.variant);
-            //         }
-            //     })
-            //
-            // })
-            // console.log(this.product_variant)
-            // console.log(tags)
-            //     this.product_variant_props.filter((item) => {
-            //         if (uniq[i] ==item.varient_id ){
-            //             tags.push(item.tags);
-            //         }
-            //
-            //     })
-            //
-            // this.product_variant_props.filter((item) => {
-            //     tags.push(item.variant);
-            // })
-            // console.log(this.product_variant)
+            for (var i = 0; i < this.product_image.length; i++) {
 
+                let mockFile = {
+                    name: '/images/'+this.product_image[i].file_path,
+                    size: 123,
+                    type:'image/png',
+                    upload: {
+                        filename: this.product_image[i].file_path,
+                    },
 
+                };
+                this.images.push(this.product_image[i].file_path)
 
-
-            // console.log(locOption)
-            // console.log(locTag)
-
-
+                this.$refs.myVueDropzone.manuallyAddFile(
+                    mockFile,
+                    '/images/'+this.product_image[i].file_path,
+                );
+            }
+            // console.log(this.images)
 
         }
     }

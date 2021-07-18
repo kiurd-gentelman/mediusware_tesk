@@ -24,7 +24,11 @@
                         <h6 class="m-0 font-weight-bold text-primary">Media</h6>
                     </div>
                     <div class="card-body border">
-                        <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <vue-dropzone ref="myVueDropzone" id="dropzone"
+                                      :options="dropzoneOptions"
+                                      @vdropzone-complete="afterComplete"
+                                      @vdropzone-removed-file="removeFile"
+                        ></vue-dropzone>
                     </div>
                 </div>
             </div>
@@ -126,10 +130,20 @@ export default {
             ],
             product_variant_prices: [],
             dropzoneOptions: {
-                url: 'https://httpbin.org/post',
+                url: '/upload-image',
                 thumbnailWidth: 150,
                 maxFilesize: 0.5,
-                headers: {"My-Awesome-Header": "header value"}
+                addRemoveLinks: true,
+                removeFile:true,
+                uploadMultiple:true,
+                renameFile: function (file) {
+                    var dt = new Date();
+                    var time = dt.getTime();
+                    var path = time + file.name
+                    return path;
+                },
+                removedfile: function (file)  {},
+                headers: {'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,},
             }
         }
     },
@@ -187,30 +201,49 @@ export default {
                 product_variant: this.product_variant,
                 product_variant_prices: this.product_variant_prices
             }
-            let formData = new FormData();
-            formData.append(
-                'product_image', this.images,
-                'title', this.product_name,
-                'sku', this.product_sku,
-                'description', this.description,
-                'product_image', this.images,
-                'product_variant', this.product_variant,
-                'product_variant_prices', this.product_variant_prices
-
-            );
-
             console.log(product);
 
-            axios.post('/product', formData).then(response => {
+            axios.post('/product', product).then(response => {
                 console.log(response.data);
-                // window.location ='/product';
+                window.location ='/product';
             }).catch(error => {
                 console.log(error);
 
             })
 
             console.log(product);
-        }
+        },
+        removeFile(file){
+            var name = file.upload.filename;
+
+            var fileRef;
+
+            // console.log(this.images)
+            var temparray = this.images.filter(item => item != name)
+            this.images = temparray
+            // console.log(this.images)
+            axios.post('/delete-image', {'name':name}).then(response => {
+
+
+            }).catch(error => {
+                console.log(error);
+
+            })
+            return (fileRef = file.previewElement) != null ?
+                fileRef.parentNode.removeChild(file.previewElement) : void 0;
+        },
+        afterComplete: async function (response) {
+
+            if (response.status == "success") {
+                console.log(response.upload.filename)
+                console.log("upload successful");
+
+                this.sendSuccess = true;
+                this.images.push(response.upload.filename)
+            } else {
+                console.log("upload failed");
+            }
+        },
 
 
     },
@@ -219,6 +252,17 @@ export default {
         // console.log(this.product.title);
         console.log('Component mounted.')
         // console.log(this.images)
+        // Dropzone.options.imageWithZones = {
+        //     init: function() {
+        //         this.on("addedfile",
+        //             function(file) {
+        //                 vm.imageZoneNames.push(file.name);
+        //             }
+        //         );
+        //     }
+        // };
+
+
 
 
     }

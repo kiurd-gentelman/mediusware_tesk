@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantPrice;
 use App\Models\Variant;
@@ -68,12 +69,18 @@ class ProductController extends Controller
                 $insert_product->title = $request->title;
                 $insert_product->sku =$request->sku;
                 $insert_product->description =$request->description;
-                if ($request->hasFile('product_image')) {
-                    dd(2);
-                    $request->file('product_image')->store('public/product_image');
-                }
-                dd(3);
                 $insert_product->save();
+
+//                dd($request->product_image);
+                if ($request->product_image) {
+                    foreach ($request->product_image as $image){
+                        $imageInsert = new ProductImage();
+                        $imageInsert->product_id = $insert_product->id;
+                        $imageInsert->file_path = $image;
+                        $imageInsert->thumbnail = 1;
+                        $imageInsert->save();
+                    }
+                }
 
                 if ($request->product_variant) {
 
@@ -163,10 +170,11 @@ class ProductController extends Controller
     {
         $product_variant_price = $product->variantPrice;
         $product_variant = $product->productVariant;
+        $product_image = $product->productImage;
 //        dump($product_variant_price);
 //        dd($product);
         $variants = Variant::all();
-        return view('products.edit', compact('variants','product','product_variant','product_variant_price'));
+        return view('products.edit', compact('variants','product','product_variant','product_variant_price', 'product_image'));
     }
 
     /**
@@ -238,6 +246,26 @@ class ProductController extends Controller
 
         $varient = ProductVariantPrice::find($id);
         $varient->delete();
+        return response()->json(200);
+    }
+
+    public function uploadImage(Request $request){
+//        dd($request->all());
+        $imageName = $request->file[0]->getClientOriginalName();
+//        dd($imageName);
+        $path = $request->file[0]->move(public_path('images'), $imageName);
+        return response()->json($path);
+    }
+
+    public function deleteImage(Request $request){
+        if ($request->name){
+            unlink(public_path('/images/'.$request->name));
+        }
+        if($request->id != null){
+            $image = ProductImage::find($request->id);
+            $image->delete();
+        }
+//        dd($request->all());
         return response()->json(200);
     }
 }
