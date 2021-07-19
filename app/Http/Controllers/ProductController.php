@@ -304,13 +304,13 @@ class ProductController extends Controller
         $orgDate = $request->input('date');
         $newDate = date("Y-m-d", strtotime($orgDate));
 
-        dump($searchTitle,$searchVariant,$searchPriceFrom,$searchPriceTo, $newDate);
+//        dump($searchTitle,$searchVariant,$searchPriceFrom,$searchPriceTo, $newDate);
 
         if ($searchTitle){
             $products = Product::where('title' ,'LIKE','%'.$searchTitle.'%')
                 ->get()
                 ->pluck('id');
-            dump($products);
+//            dump($products);
             if ($products->count()) {
                 foreach ($products as $product){
                     array_push($productId , $product);
@@ -322,14 +322,14 @@ class ProductController extends Controller
 
         if ($searchVariant>0){
             $products = ProductVariant::where('variant_id' ,$searchVariant)->get()->pluck('product_id');
-            dump($products);
+//            dump($products);
             if ($products->count()) {
                 $tempVariantArray = [];
                 foreach ($products as $product){
                     array_push($tempVariantArray , $product);
                 }
                 $tempVariantArray =array_unique($tempVariantArray);
-                dump($tempVariantArray);
+//                dump($tempVariantArray);
                 if (count($productId)){
                     $productId = array_intersect($productId, $tempVariantArray);
                     array_push($productId , 0);
@@ -344,14 +344,14 @@ class ProductController extends Controller
 
         if (!is_null($searchPriceFrom) && !is_null($searchPriceTo)){
             $products = ProductVariantPrice::whereBetween('price' ,[$searchPriceFrom,$searchPriceTo])->get()->pluck('product_id');
-            dump($products);
+//            dump($products);
             if ($products->count()) {
                 $tempVariantArray = [];
                 foreach ($products as $product){
                     array_push($tempVariantArray , $product);
                 }
                 $tempVariantArray = array_unique($tempVariantArray);
-                dump($tempVariantArray);
+//                dump($tempVariantArray);
                 if (count($productId)){
                     $productId = array_intersect($productId, $tempVariantArray);
                     array_push($productId , 0);
