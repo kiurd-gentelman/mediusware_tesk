@@ -44,6 +44,7 @@
                                 <div class="form-group">
                                     <label for="">Option</label>
                                     <select v-model="item.option" class="form-control">
+                                        <option value="0">Select one</option>
                                         <option v-for="variant in variants"
                                                 :value="variant.id">
                                             {{ variant.title }}

@@ -1971,6 +1971,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
 
 
 
@@ -2435,7 +2436,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       };
-      axios.post('/product', product).then(function (response) {
+      console.log(product);
+      axios.post('/product/' + this.product.id + '/edit', product).then(function (response) {
         console.log(response.data);
         window.location = '/product';
       })["catch"](function (error) {
@@ -2473,7 +2475,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       console.log(name);
       var tempID = this.product_image.filter(function (item) {
         return item.file_path === name;
-      })[0].id;
+      })[0];
+
+      if (tempID) {
+        tempID = tempID.id;
+      } else {
+        tempID = null;
+      }
+
       console.log(tempID);
       axios.post('/delete-image', {
         'name': name,
@@ -2523,7 +2532,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     console.log('Component mounted.');
     console.log(this.product_variant_props);
     this.product_name = this.product.title;
-    this.product_sku = this.product.product_sku;
+    this.product_sku = this.product.sku;
     this.description = this.product.description;
     var locOption = [];
     var locTag = [];
@@ -2540,8 +2549,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         upload: {
           filename: this.product_image[i].file_path
         }
-      };
-      this.images.push(this.product_image[i].file_path);
+      }; // this.images.push(this.product_image[i].file_path)
+
       this.$refs.myVueDropzone.manuallyAddFile(mockFile, '/images/' + this.product_image[i].file_path);
     } // console.log(this.images)
 
@@ -51723,20 +51732,26 @@ var render = function() {
                           }
                         }
                       },
-                      _vm._l(_vm.variants, function(variant) {
-                        return _c(
-                          "option",
-                          { domProps: { value: variant.id } },
-                          [
-                            _vm._v(
-                              "\n                                        " +
-                                _vm._s(variant.title) +
-                                "\n                                    "
-                            )
-                          ]
-                        )
-                      }),
-                      0
+                      [
+                        _c("option", { attrs: { value: "0" } }, [
+                          _vm._v("Select one")
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(_vm.variants, function(variant) {
+                          return _c(
+                            "option",
+                            { domProps: { value: variant.id } },
+                            [
+                              _vm._v(
+                                "\n                                        " +
+                                  _vm._s(variant.title) +
+                                  "\n                                    "
+                              )
+                            ]
+                          )
+                        })
+                      ],
+                      2
                     )
                   ])
                 ]),

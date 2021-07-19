@@ -16,6 +16,7 @@
                 </div>
                 <div class="col-md-2">
                     <select name="variant" id="" class="form-control" name="variant">
+                        <option value="0" selected >Select one</option>
                         @forelse($variants as $variant)
                         <option {{($request->variant ?? '' == $variant->id)?'selected':''}} value="{{$variant->id}}">{{$variant->title}}</option>
                         @empty
@@ -29,8 +30,8 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">Price Range</span>
                         </div>
-                        <input type="text" name="price_from" aria-label="First name" value="{{$request->price_from ?? ''}}" placeholder="From" class="form-control">
-                        <input type="text" name="price_to" aria-label="Last name" value="{{$request->price_to ?? ''}}" placeholder="To" class="form-control">
+                        <input type="text" name="price_from" aria-label="First name" value="{{$request->price_from ?? ''}}" placeholder="From" class="form-control" >
+                        <input type="text" name="price_to" aria-label="Last name" value="{{$request->price_to ?? ''}}" placeholder="To" class="form-control" >
                     </div>
                 </div>
                 <div class="col-md-2">

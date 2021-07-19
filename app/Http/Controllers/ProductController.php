@@ -184,9 +184,102 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
-        //
+//        dd($id);
+        $request->validate([
+            'title'=>'required',
+            'sku'=>'required|unique:products,id,'.$id,
+            'description'=>'required',
+        ]);
+
+        $exception = DB::transaction(function() use ($request,$id) {
+            $product_variant_one = array();
+            $product_variant_two = array();
+            $product_variant_three = array();
+            // try...catch
+            try {
+
+                $insert_product =  Product:: find($id);
+                $insert_product->title = $request->title;
+                $insert_product->sku =$request->sku;
+                $insert_product->description =$request->description;
+                $insert_product->save();
+
+//                dd($request->product_image);
+                if ($request->product_image) {
+                    foreach ($request->product_image as $image){
+                        $imageInsert = new ProductImage();
+                        $imageInsert->product_id = $insert_product->id;
+                        $imageInsert->file_path = $image;
+                        $imageInsert->thumbnail = 1;
+                        $imageInsert->save();
+                    }
+                }
+
+                if ($request->product_variant) {
+
+                    foreach ($request->product_variant_prices as $key=>$product_variant_price){
+
+                        $product_variant_price_array = explode("/", $product_variant_price['title']);
+                        foreach ($product_variant_price_array as $key1=>$item){
+                            if ($item) {
+                                $insert_product_variant = new ProductVariant();
+                                $insert_product_variant->variant = $product_variant_price_array[$key1];
+                                $insert_product_variant->variant_id = $request->product_variant[$key1]['option'];
+                                $insert_product_variant->product_id = $insert_product->id;
+                                $insert_product_variant->save();
+
+                                if ($request->product_variant[$key1]['option'] == 1) {
+                                    $product_variant_one[] = $insert_product_variant->id;
+//                                    dump(';product_varient_one id boshbe');
+                                }
+                                elseif ($request->product_variant[$key1]['option'] == 2){
+                                    $product_variant_two[] = $insert_product_variant->id;
+//                                    dump(';product_varient_two');
+                                }
+                                else{
+                                    $product_variant_three[] = $insert_product_variant->id;
+//                                    dump(';product_varient_three');
+                                }
+                            }
+                        }
+                    }
+                    if ($request->product_variant_prices) {
+                        $count = max(count($product_variant_one) , count($product_variant_two) , count($product_variant_three));
+                        for ($i=0 ;$i<$count ; $i++){
+                            $insert_product_variant_price = new ProductVariantPrice();
+                            if (array_key_exists($i,$product_variant_one)) {
+                                $insert_product_variant_price->product_variant_one = $product_variant_one[$i];
+                            }
+                            if (array_key_exists($i,$product_variant_two)){
+                                $insert_product_variant_price->product_variant_two = $product_variant_two[$i];
+                            }
+                            if (array_key_exists($i,$product_variant_three)){
+                                $insert_product_variant_price->product_variant_three = $product_variant_three[$i];
+                            }
+                            $insert_product_variant_price->price = $product_variant_price['price'];
+                            $insert_product_variant_price->stock = $product_variant_price['stock'];
+                            $insert_product_variant_price->product_id = $insert_product->id;
+                            $insert_product_variant_price->save();
+                        }
+                    }
+
+//                    dump($product_variant_one);
+//                    dump($product_variant_two);
+//                    dump($product_variant_three);
+//                    dd($request->product_variant_prices);
+                }
+
+            }
+            catch(Exception $e) {
+                return $e;
+            }
+
+        });
+//
+//        dd(3);
+        return response()->json(200);
     }
 
     /**
@@ -207,35 +300,95 @@ class ProductController extends Controller
         $searchVariant = $request->input('variant');
         $searchPriceFrom = $request->input('price_from');
         $searchPriceTo = $request->input('price_to');
+
         $orgDate = $request->input('date');
         $newDate = date("Y-m-d", strtotime($orgDate));
-//        $v = ProductVariant::where('variant_id' , $searchVariant)->get()->pluck('id');
-//            dd($newDate);
-        $products = Product::where('title' ,'LIKE',"%{$searchTitle}%")
-            ->orWhereDate('created_at', '=', $newDate)
-            ->get()->pluck('id');
-//        dd($products);
-        foreach ($products as $product){
-//            dump($product);
-            array_push($productId , $product);
-        }
 
-        $products = ProductVariant::where('variant_id' ,$searchVariant)->get()->pluck('product_id');
-//        dd($products);
-        if ($products->count()) {
-            foreach ($products as $product){
-//            dump($product);
-                array_push($productId , $product);
+        dump($searchTitle,$searchVariant,$searchPriceFrom,$searchPriceTo, $newDate);
+
+        if ($searchTitle){
+            $products = Product::where('title' ,'LIKE','%'.$searchTitle.'%')
+                ->get()
+                ->pluck('id');
+            dump($products);
+            if ($products->count()) {
+                foreach ($products as $product){
+                    array_push($productId , $product);
+                }
+            }else{
+                array_push($productId , 0);
             }
         }
 
-        $products = ProductVariantPrice::whereBetween('price' ,[$searchPriceFrom,$searchPriceTo])->get()->pluck('product_id');
-        if ($products->count()) {
-            foreach ($products as $product){
-//            dump($product);
-                array_push($productId , $product);
+        if ($searchVariant>0){
+            $products = ProductVariant::where('variant_id' ,$searchVariant)->get()->pluck('product_id');
+            dump($products);
+            if ($products->count()) {
+                $tempVariantArray = [];
+                foreach ($products as $product){
+                    array_push($tempVariantArray , $product);
+                }
+                $tempVariantArray =array_unique($tempVariantArray);
+                dump($tempVariantArray);
+                if (count($productId)){
+                    $productId = array_intersect($productId, $tempVariantArray);
+                    array_push($productId , 0);
+                    dump($productId);
+                }else{
+                    $productId = $tempVariantArray;
+                }
+            }else{
+                array_push($productId , 0);
             }
         }
+
+        if (!is_null($searchPriceFrom) && !is_null($searchPriceTo)){
+            $products = ProductVariantPrice::whereBetween('price' ,[$searchPriceFrom,$searchPriceTo])->get()->pluck('product_id');
+            dump($products);
+            if ($products->count()) {
+                $tempVariantArray = [];
+                foreach ($products as $product){
+                    array_push($tempVariantArray , $product);
+                }
+                $tempVariantArray = array_unique($tempVariantArray);
+                dump($tempVariantArray);
+                if (count($productId)){
+                    $productId = array_intersect($productId, $tempVariantArray);
+                    array_push($productId , 0);
+                }else{
+                    $productId = $tempVariantArray;
+                }
+
+            }else{
+                array_push($productId , 0);
+            }
+        }
+
+
+        if(!is_null($orgDate)){
+
+            $products = Product::whereDate('created_at', '=', $newDate) ->get()->pluck('id');
+            if ($products->count()) {
+//                array_push($productId , 0);
+                $tempVariantArray = [];
+                foreach ($products as $product){
+                    array_push($tempVariantArray , $product);
+                }
+                $tempVariantArray =array_unique($tempVariantArray);
+
+
+                if (count($productId)){
+                    $productId = array_intersect($productId, $tempVariantArray);
+                    array_push($productId , 0);
+                }else{
+                    $productId = $tempVariantArray;
+                }
+            }else{
+                array_push($productId , 0);
+            }
+        }
+
+
 
         $products = Product::with('variantPrice')->whereIn('id',$productId)->get();
         $variants = Variant::all();

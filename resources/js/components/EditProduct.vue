@@ -257,7 +257,8 @@
                     product_variant: this.product_variant,
                     product_variant_prices: this.product_variant_prices
                 }
-                axios.post('/product', product).then(response => {
+                console.log(product);
+                axios.post('/product/'+this.product.id+'/edit', product).then(response => {
                     console.log(response.data);
                     window.location ='/product';
                 }).catch(error => {
@@ -295,8 +296,12 @@
                 var fileRef;
 
                 console.log(name)
-                var tempID = this.product_image.filter(item => item.file_path === name)[0].id
-
+                var tempID = this.product_image.filter(item => item.file_path === name)[0]
+                if (tempID){
+                    tempID= tempID.id
+                }else {
+                    tempID= null
+                }
                 console.log(tempID)
                 axios.post('/delete-image', {'name':name , 'id':tempID}).then(response => {
                     var temparray = this.images.filter(item => item != name)
@@ -328,7 +333,7 @@
             console.log('Component mounted.')
             console.log(this.product_variant_props)
             this.product_name = this.product.title;
-            this.product_sku = this.product.product_sku;
+            this.product_sku = this.product.sku;
             this.description = this.product.description;
 
             let locOption = []
@@ -351,7 +356,7 @@
                     },
 
                 };
-                this.images.push(this.product_image[i].file_path)
+                // this.images.push(this.product_image[i].file_path)
 
                 this.$refs.myVueDropzone.manuallyAddFile(
                     mockFile,

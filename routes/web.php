@@ -23,6 +23,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::resource('product-variant', 'VariantController');
+    Route::post('/product/{id}/edit','ProductController@update');
     Route::resource('product', 'ProductController');
     Route::get('/variant-delete/{id}', 'ProductController@variant_delete');
     Route::get('/search', 'ProductController@search')->name('search');
